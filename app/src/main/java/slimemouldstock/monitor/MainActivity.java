@@ -34,9 +34,10 @@ public class MainActivity extends CameraActivity {
     // Looking to recognise slime mould coloured pixels (in our ideal lighting)
     // in HSV
     // lowering H value helps capture more orange
-    // S value is more to do with getting rid of white light
+    // S value is more to do with getting rid of white light - good for getting rid of shadows
+    //      reflections/hue leakage of yellow
     // V doesn't seem to do a whole lot
-    Scalar inRangeLowerBoundHSV = new Scalar(22, 150, 0);
+    Scalar inRangeLowerBoundHSV = new Scalar(22, 200, 0);
     Scalar inRangeUpperBoundHSV = new Scalar(50, 255, 255);
 
     @Override
@@ -88,14 +89,6 @@ public class MainActivity extends CameraActivity {
                 maskedRGB.setTo(Scalar.all(0));
                 // dst = maskedRGB
                 Core.bitwise_and(inputFrameRGB, inputFrameRGB, maskedRGB, inRangeThresholdMask);
-//
-//                Mat outputFrameRGBA = new Mat();
-//
-//                Imgproc.cvtColor(
-//                        maskedRGB,
-//                        outputFrameRGBA,
-//                        Imgproc.COLOR_RGB2RGBA
-//                );
 
                 return maskedRGB;
             }
