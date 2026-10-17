@@ -6,9 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -30,12 +28,16 @@ public class MainActivity extends CameraActivity {
     CameraBridgeViewBase cameraBridgeViewBase;
     Mat inRangeThresholdMask;
     Mat inputFrameRGB;
+    Mat inputFrameHSV;
     Mat maskedRGB;
 
     // Looking to recognise slime mould coloured pixels (in our ideal lighting)
-    Scalar inRangeUpperBound = new Scalar(189, 160, 92);
-
-    Scalar inRangeLowerBound = new Scalar(179, 136, 30);
+    // in HSV
+    // lowering H value helps capture more orange
+    // S value is more to do with getting rid of white light
+    // V doesn't seem to do a whole lot
+    Scalar inRangeLowerBoundHSV = new Scalar(22, 150, 0);
+    Scalar inRangeUpperBoundHSV = new Scalar(50, 255, 255);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +61,7 @@ public class MainActivity extends CameraActivity {
             public void onCameraViewStarted(int width, int height) {
                 // init these here after OpenCV has initialized
                 inputFrameRGB = new Mat();
+                inputFrameHSV = new Mat();
                 inRangeThresholdMask = new Mat();
                 maskedRGB = new Mat();
             }
@@ -75,12 +78,25 @@ public class MainActivity extends CameraActivity {
                 // https://docs.opencv.org/3.4.13/da/d97/tutorial_threshold_inRange.html
                 // https://docs.opencv.org/4.12.0/javadoc/org/opencv/core/Core.html#inRange(org.opencv.core.Mat,org.opencv.core.Scalar,org.opencv.core.Scalar,org.opencv.core.Mat)
                 // https://pyimagesearch.com/2014/08/04/opencv-python-color-detection/
+                // RGBA -> HSV
                 Imgproc.cvtColor(inputFrameRGBA, inputFrameRGB, Imgproc.COLOR_RGBA2RGB);
-                Core.inRange(inputFrameRGB, inRangeLowerBound, inRangeUpperBound, inRangeThresholdMask);
+                Imgproc.cvtColor(inputFrameRGB, inputFrameHSV, Imgproc.COLOR_RGB2HSV);
+
+                // ranges in HSV
+                Core.inRange(inputFrameHSV, inRangeLowerBoundHSV, inRangeUpperBoundHSV, inRangeThresholdMask);
 
                 maskedRGB.setTo(Scalar.all(0));
                 // dst = maskedRGB
                 Core.bitwise_and(inputFrameRGB, inputFrameRGB, maskedRGB, inRangeThresholdMask);
+//
+//                Mat outputFrameRGBA = new Mat();
+//
+//                Imgproc.cvtColor(
+//                        maskedRGB,
+//                        outputFrameRGBA,
+//                        Imgproc.COLOR_RGB2RGBA
+//                );
+
                 return maskedRGB;
             }
         });
