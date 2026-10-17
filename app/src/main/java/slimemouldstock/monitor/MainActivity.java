@@ -35,7 +35,7 @@ public class MainActivity extends CameraActivity {
     // in HSV
     // lowering H value helps capture more orange
     // S value is more to do with getting rid of white light - good for getting rid of shadows
-    //      reflections/hue leakage of yellow
+    //      reflections/hue leakage of yellow, but less colour info
     // V doesn't seem to do a whole lot
     Scalar inRangeLowerBoundHSV = new Scalar(22, 200, 0);
     Scalar inRangeUpperBoundHSV = new Scalar(50, 255, 255);
