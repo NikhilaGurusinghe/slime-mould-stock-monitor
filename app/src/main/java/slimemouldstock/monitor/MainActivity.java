@@ -17,6 +17,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.Collections;
@@ -26,8 +27,10 @@ import java.util.List;
 // setup
 // https://www.youtube.com/watch?v=6Nl3JYpEgeI&list=PLTuKYqpidPXZjtOEjOgeKxNAe4NzSgsg8&index=3
 // https://docs.opencv.org/4.13.0/d5/df8/tutorial_dev_with_OCV_on_Android.html
-// center of contouring (used to center the petri dish)
+// center of contouring (used to find center of the petri dish)
 // https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/
+// aruco marker detection
+// https://docs.opencv.org/3.4.20/d5/dae/tutorial_aruco_detection.html
 // inRange thresholding
 // https://docs.opencv.org/3.4.13/da/d97/tutorial_threshold_inRange.html
 // https://docs.opencv.org/4.12.0/javadoc/org/opencv/core/Core.html#inRange(org.opencv.core.Mat,org.opencv.core.Scalar,org.opencv.core.Scalar,org.opencv.core.Mat)
@@ -37,6 +40,7 @@ public class MainActivity extends CameraActivity {
     CameraBridgeViewBase cameraBridgeViewBase;
     Mat inRangeThresholdMask;
     Mat inputFrameRGB;
+    Mat inputFrameRGBBlurred;
     Mat inputFrameHSV;
     Mat maskedRGB;
 
@@ -46,8 +50,8 @@ public class MainActivity extends CameraActivity {
     // S value is more to do with getting rid of white light - good for getting rid of shadows
     //      reflections/hue leakage of yellow, but less colour info
     // V doesn't seem to do a whole lot
-    Scalar inRangeLowerBoundHSV = new Scalar(22, 200, 0);
-    Scalar inRangeUpperBoundHSV = new Scalar(50, 255, 255);
+    Scalar inRangeLowerBoundHSV = new Scalar(20, 175, 0);
+    Scalar inRangeUpperBoundHSV = new Scalar(80, 255, 255);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +76,7 @@ public class MainActivity extends CameraActivity {
             public void onCameraViewStarted(int width, int height) {
                 // init these here after OpenCV has initialized
                 inputFrameRGB = new Mat();
+                inputFrameRGBBlurred = new Mat();
                 inputFrameHSV = new Mat();
                 inRangeThresholdMask = new Mat();
                 maskedRGB = new Mat();
@@ -88,7 +93,9 @@ public class MainActivity extends CameraActivity {
 
                 // RGBA -> HSV
                 Imgproc.cvtColor(inputFrameRGBA, inputFrameRGB, Imgproc.COLOR_RGBA2RGB);
-                Imgproc.cvtColor(inputFrameRGB, inputFrameHSV, Imgproc.COLOR_RGB2HSV);
+                // guassian blur on main RGB, if we want more blur use a 5x5 kernel
+                Imgproc.GaussianBlur(inputFrameRGB, inputFrameRGBBlurred, new Size(3, 3), 0, 0);
+                Imgproc.cvtColor(inputFrameRGBBlurred, inputFrameHSV, Imgproc.COLOR_RGB2HSV);
 
                 // ranges in HSV
                 Core.inRange(inputFrameHSV, inRangeLowerBoundHSV, inRangeUpperBoundHSV, inRangeThresholdMask);
