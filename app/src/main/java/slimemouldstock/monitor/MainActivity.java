@@ -22,7 +22,16 @@ import org.opencv.imgproc.Imgproc;
 import java.util.Collections;
 import java.util.List;
 
+// code credits ->
+// setup
 // https://www.youtube.com/watch?v=6Nl3JYpEgeI&list=PLTuKYqpidPXZjtOEjOgeKxNAe4NzSgsg8&index=3
+// https://docs.opencv.org/4.13.0/d5/df8/tutorial_dev_with_OCV_on_Android.html
+// center of contouring (used to center the petri dish)
+// https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/
+// inRange thresholding
+// https://docs.opencv.org/3.4.13/da/d97/tutorial_threshold_inRange.html
+// https://docs.opencv.org/4.12.0/javadoc/org/opencv/core/Core.html#inRange(org.opencv.core.Mat,org.opencv.core.Scalar,org.opencv.core.Scalar,org.opencv.core.Mat)
+// https://pyimagesearch.com/2014/08/04/opencv-python-color-detection/
 public class MainActivity extends CameraActivity {
 
     CameraBridgeViewBase cameraBridgeViewBase;
@@ -56,6 +65,7 @@ public class MainActivity extends CameraActivity {
         cameraBridgeViewBase = findViewById(R.id.cameraView);
         // for some reason this doesn't work as you'd expect
         // this sets it to a higher resolution 1280x2560 (even though it's 100x100)
+        // default is 768 x 1024
 //        cameraBridgeViewBase.setMaxFrameSize(100, 100);
         cameraBridgeViewBase.setCvCameraViewListener(new CameraBridgeViewBase.CvCameraViewListener2() {
             @Override
@@ -76,9 +86,6 @@ public class MainActivity extends CameraActivity {
             public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
                 Mat inputFrameRGBA = inputFrame.rgba();
 
-                // https://docs.opencv.org/3.4.13/da/d97/tutorial_threshold_inRange.html
-                // https://docs.opencv.org/4.12.0/javadoc/org/opencv/core/Core.html#inRange(org.opencv.core.Mat,org.opencv.core.Scalar,org.opencv.core.Scalar,org.opencv.core.Mat)
-                // https://pyimagesearch.com/2014/08/04/opencv-python-color-detection/
                 // RGBA -> HSV
                 Imgproc.cvtColor(inputFrameRGBA, inputFrameRGB, Imgproc.COLOR_RGBA2RGB);
                 Imgproc.cvtColor(inputFrameRGB, inputFrameHSV, Imgproc.COLOR_RGB2HSV);
