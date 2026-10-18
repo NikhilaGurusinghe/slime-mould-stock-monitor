@@ -150,6 +150,7 @@ public class MainActivity extends CameraActivity {
                 Core.bitwise_and(inputFrameRGB, inputFrameRGB, maskedRGB, inRangeThresholdMask);
 
                 // draw centroid of petri dish
+                // TODO have this work on a timer
                 if (petriDishContour != null) {
                     Moments petriDishMoment = Imgproc.moments(petriDishContour);
 
@@ -165,7 +166,7 @@ public class MainActivity extends CameraActivity {
                         double petriDishDiameterMm = 90.0; // 9cm petri dish
                         double petriDishDiameterPx =
                                 (dishBoundingRect.width + dishBoundingRect.height) / 2.0;
-                        double pointOfInterestShiftMm = 37;
+                        double pointOfInterestShiftMm = 35;
                         double pixelsPerMm = petriDishDiameterPx / petriDishDiameterMm;
                         int pointOfInterestShiftPx = (int)
                                 Math.round(pointOfInterestShiftMm * pixelsPerMm);
@@ -178,55 +179,55 @@ public class MainActivity extends CameraActivity {
                                 new Scalar(0, 255, 0), 2);
 
                         // drawing detection squares
-                        int halfSize = 20;
+                        int regionHalfSize = 20;
                         Scalar color = new Scalar(255, 125, 0);
                         int thickness = 2;
                         Rect southRect = new Rect(
-                                new Point(centroidX - halfSize,
-                                        centroidY + pointOfInterestShiftPx - halfSize),
-                                new Point(centroidX + halfSize,
-                                        centroidY + pointOfInterestShiftPx + halfSize)
+                                new Point(centroidX - regionHalfSize,
+                                        centroidY + pointOfInterestShiftPx - regionHalfSize),
+                                new Point(centroidX + regionHalfSize,
+                                        centroidY + pointOfInterestShiftPx + regionHalfSize)
                         );
                         Rect southEastRect = new Rect(
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) - halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) - halfSize),
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) + halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) + halfSize)
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) - regionHalfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) - regionHalfSize),
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) + regionHalfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) + regionHalfSize)
                         );
                         Rect northRect = new Rect(
-                                new Point(centroidX - halfSize,
-                                        centroidY - pointOfInterestShiftPx - halfSize),
-                                new Point(centroidX + halfSize,
-                                        centroidY - pointOfInterestShiftPx + halfSize)
+                                new Point(centroidX - regionHalfSize,
+                                        centroidY - pointOfInterestShiftPx - regionHalfSize),
+                                new Point(centroidX + regionHalfSize,
+                                        centroidY - pointOfInterestShiftPx + regionHalfSize)
                         );
                         Rect northEastRect = new Rect(
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) - halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) - halfSize),
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) + halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) + halfSize)
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) - regionHalfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) - regionHalfSize),
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) + regionHalfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) + regionHalfSize)
                         );
                         Rect eastRect = new Rect(
-                                new Point(centroidX + pointOfInterestShiftPx - halfSize,
-                                centroidY - halfSize),
-                                new Point(centroidX + pointOfInterestShiftPx + halfSize,
-                                        centroidY + halfSize)
+                                new Point(centroidX + pointOfInterestShiftPx - regionHalfSize,
+                                centroidY - regionHalfSize),
+                                new Point(centroidX + pointOfInterestShiftPx + regionHalfSize,
+                                        centroidY + regionHalfSize)
                         );
-                        Rect northWestRect = new Rect(new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) - halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) - halfSize),
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) + halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) + halfSize)
+                        Rect northWestRect = new Rect(new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) - regionHalfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) - regionHalfSize),
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) + regionHalfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) + regionHalfSize)
                         );
                         Rect westRect = new Rect(
-                                new Point(centroidX - pointOfInterestShiftPx - halfSize,
-                                centroidY - halfSize),
-                                new Point(centroidX - pointOfInterestShiftPx + halfSize,
-                                        centroidY + halfSize)
+                                new Point(centroidX - pointOfInterestShiftPx - regionHalfSize,
+                                centroidY - regionHalfSize),
+                                new Point(centroidX - pointOfInterestShiftPx + regionHalfSize,
+                                        centroidY + regionHalfSize)
                         );
                         Rect southWestRect = new Rect(
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) - halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) - halfSize),
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) + halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) + halfSize)
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) - regionHalfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) - regionHalfSize),
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) + regionHalfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) + regionHalfSize)
                         );
                         Rect thresholdRect = new Rect(0, 0,
                                 inRangeThresholdMask.cols(), inRangeThresholdMask.rows());
@@ -240,6 +241,7 @@ public class MainActivity extends CameraActivity {
 
                         for (int i = 0; i < allRects.size(); i++) {
                             Rect rect = allRects.get(i);
+
                             // clip rectangles into our threshold mask
                             Rect clippedRect = intersectRect(rect, thresholdRect);
 
@@ -254,10 +256,15 @@ public class MainActivity extends CameraActivity {
                             Log.d(allRectsLabels.get(i), allRectsLabels.get(i) + ": " + percentageSlimeMouldPixels * 100 + "%");
 
                             Imgproc.rectangle(inputFrameRGB, rect.tl(), rect.br(), color, thickness);
+                            Imgproc.putText(inputFrameRGB,
+                                    Math.round(percentageSlimeMouldPixels * 100) + "%",
+                                    rect.tl(), Imgproc.FONT_HERSHEY_SIMPLEX, 1,
+                                    new Scalar(255, 255, 255), 2);
+
+                            // make a decision here and send API request, depending on if decision
+                            // was succesful
                         }
-
                     }
-
                 }
 
 
