@@ -151,12 +151,13 @@ public class MainActivity extends CameraActivity {
                         int centroidX = (int) (petriDishMoment.m10 / petriDishMoment.m00);
                         int centroidY = (int) (petriDishMoment.m01 / petriDishMoment.m00);
 
+                        // camera calibration using the petri dish's size
                         // we get the bounding rectangle to calculate the width of the dish in pixels
                         Rect dishBoundingRect = Imgproc.boundingRect(petriDishContour);
                         Imgproc.rectangle(inputFrameRGB, dishBoundingRect.tl(), dishBoundingRect.br(), new Scalar(0, 0, 255), 3);
                         double petriDishDiameterMm = 90.0; // 9cm petri dish
                         double petriDishDiameterPx = (dishBoundingRect.width + dishBoundingRect.height) / 2.0;
-                        double pointOfInterestShiftMm = 30;
+                        double pointOfInterestShiftMm = 37;
                         double pixelsPerMm = petriDishDiameterPx / petriDishDiameterMm;
                         int pointOfInterestShiftPx = (int) Math.round(pointOfInterestShiftMm * pixelsPerMm);
 
@@ -165,11 +166,58 @@ public class MainActivity extends CameraActivity {
                         // drawing largest contour
                         Imgproc.drawContours(inputFrameRGB, List.of(petriDishContour), 0, new Scalar(0, 255, 0), 2);
 
+                        // drawing detection squares
+                        int halfSize = 20;
+                        Scalar color = new Scalar(255, 125, 0);
+                        int thickness = 2;
+                        Imgproc.rectangle(inputFrameRGB,
+                                new Point(centroidX - halfSize, centroidY + pointOfInterestShiftPx - halfSize),
+                                new Point(centroidX + halfSize, centroidY + pointOfInterestShiftPx + halfSize),
+                                color, thickness);
 
-                        Imgproc.circle(inputFrameRGB, new Point(centroidX, centroidY + pointOfInterestShiftPx), 20,  new Scalar(255, 125, 0), 2);
-                        Imgproc.circle(inputFrameRGB, new Point(centroidX, centroidY - pointOfInterestShiftPx), 20,  new Scalar(255, 125, 0), 2);
-                        Imgproc.circle(inputFrameRGB, new Point(centroidX + pointOfInterestShiftPx, centroidY), 20,  new Scalar(255, 125, 0), 2);
-                        Imgproc.circle(inputFrameRGB, new Point(centroidX - pointOfInterestShiftPx, centroidY), 20,  new Scalar(255, 125, 0), 2);
+                        Imgproc.rectangle(inputFrameRGB,
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) - halfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) - halfSize),
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) + halfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) + halfSize),
+                                color, thickness);
+
+                        Imgproc.rectangle(inputFrameRGB,
+                                new Point(centroidX - halfSize, centroidY - pointOfInterestShiftPx - halfSize),
+                                new Point(centroidX + halfSize, centroidY - pointOfInterestShiftPx + halfSize),
+                                color, thickness);
+
+                        Imgproc.rectangle(inputFrameRGB,
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) - halfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) - halfSize),
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) + halfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) + halfSize),
+                                color, thickness);
+
+                        Imgproc.rectangle(inputFrameRGB,
+                                new Point(centroidX + pointOfInterestShiftPx - halfSize, centroidY - halfSize),
+                                new Point(centroidX + pointOfInterestShiftPx + halfSize, centroidY + halfSize),
+                                color, thickness);
+
+                        Imgproc.rectangle(inputFrameRGB,
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) - halfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) - halfSize),
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) + halfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) + halfSize),
+                                color, thickness);
+
+                        Imgproc.rectangle(inputFrameRGB,
+                                new Point(centroidX - pointOfInterestShiftPx - halfSize, centroidY - halfSize),
+                                new Point(centroidX - pointOfInterestShiftPx + halfSize, centroidY + halfSize),
+                                color, thickness);
+
+                        Imgproc.rectangle(inputFrameRGB,
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) - halfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) - halfSize),
+                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) + halfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) + halfSize),
+                                color, thickness);
+
                     }
 
                 }
