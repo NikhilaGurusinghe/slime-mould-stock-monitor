@@ -1,12 +1,16 @@
-package slimemouldstock.monitor.State;
+package slimemouldstock.monitor.state;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 
-public class TrayInState extends State {
+public class TrayOutState extends State {
+    public TrayOutState(StateManager stateManager) {
+        super(stateManager);
+    }
+
     @Override
     public Mat onCameraFrame(Mat frameRGBA, Mat frameRGB, Mat frameHSV, Mat frameGRAY,
-                             Mat edgeDetectionMask, Mat slimeMouldDetectionMask,
+                             Mat slimeMouldRGB, Mat edgeDetectionMask, Mat slimeMouldDetectionMask,
                              MatOfPoint petriDishContour) {
 
         return new Mat();
