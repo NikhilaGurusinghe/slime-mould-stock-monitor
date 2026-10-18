@@ -43,6 +43,8 @@ import java.util.Optional;
 // https://docs.opencv.org/3.4.13/da/d97/tutorial_threshold_inRange.html
 // https://docs.opencv.org/4.12.0/javadoc/org/opencv/core/Core.html#inRange(org.opencv.core.Mat,org.opencv.core.Scalar,org.opencv.core.Scalar,org.opencv.core.Mat)
 // https://pyimagesearch.com/2014/08/04/opencv-python-color-detection/
+// run method every X seconds in android
+// https://stackoverflow.com/questions/6242268/repeat-a-task-with-a-time-delay
 public class MainActivity extends CameraActivity {
 
     // cv2 camera stuff

@@ -1,10 +1,13 @@
 package slimemouldstock.monitor.State;
 
-import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 
 public class GrowthState extends State {
     @Override
-    public void onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+    public void onCameraFrame(Mat frameRGBA, Mat frameRGB, Mat frameHSV, Mat frameGRAY,
+                              Mat edgeDetectionMask, Mat slimeMouldDetectionMask,
+                              MatOfPoint petriDishContour) {
 
     }
 
