@@ -25,6 +25,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -111,20 +112,24 @@ public class MainActivity extends CameraActivity {
                 Imgproc.cvtColor(inputFrameRGBA, inputFrameRGB, Imgproc.COLOR_RGBA2RGB);
                 // RGB -> RGB + guassian blur
                 // guassian blur on main RGB, if we want more blur use a 5x5 kernel
-                Imgproc.GaussianBlur(inputFrameRGB, inputFrameRGBBlurred, new Size(3, 3), 0, 0);
+                Imgproc.GaussianBlur(inputFrameRGB, inputFrameRGBBlurred,
+                        new Size(3, 3), 0, 0);
                 // RGB + guassian blur -> HSV
                 Imgproc.cvtColor(inputFrameRGBBlurred, inputFrameHSV, Imgproc.COLOR_RGB2HSV);
 
                 // RGBA -> Gray
                 Imgproc.cvtColor(inputFrameRGBA, inputFrameGRAY, Imgproc.COLOR_RGBA2GRAY);
-                Imgproc.GaussianBlur(inputFrameGRAY, inputFrameGRAYBlurred, new Size(5, 5), 0, 0);
+                Imgproc.GaussianBlur(inputFrameGRAY, inputFrameGRAYBlurred,
+                        new Size(5, 5), 0, 0);
                 // shapes are white after thresholding
-                Imgproc.threshold(inputFrameGRAYBlurred, edgeDetectionThresholdMask, 60, 255, Imgproc.THRESH_BINARY);
+                Imgproc.threshold(inputFrameGRAYBlurred, edgeDetectionThresholdMask,
+                        60, 255, Imgproc.THRESH_BINARY);
                 // finding contours
                 // can make this more efficient by doing this once and storing list of contours
                 //      assumes that the camera does not move
                 List<MatOfPoint> contours = new ArrayList<>();
-                Imgproc.findContours(edgeDetectionThresholdMask, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+                Imgproc.findContours(edgeDetectionThresholdMask, contours,
+                        new Mat(), Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_NONE);
                 // get largest contour (by area) -> assume petri dish is the largest thing in frame
                 // https://stackoverflow.com/questions/40669684/opencv-sorting-contours-by-area-in-java
                 Optional<MatOfPoint> largest = contours.stream().max(new Comparator<MatOfPoint>() {
@@ -136,7 +141,8 @@ public class MainActivity extends CameraActivity {
                 MatOfPoint petriDishContour = largest.orElse(null);
 
                 // ranges in HSV
-                Core.inRange(inputFrameHSV, inRangeLowerBoundHSV, inRangeUpperBoundHSV, inRangeThresholdMask);
+                Core.inRange(inputFrameHSV, inRangeLowerBoundHSV,
+                        inRangeUpperBoundHSV, inRangeThresholdMask);
 
                 maskedRGB.setTo(Scalar.all(0));
                 // dst = maskedRGB
@@ -154,69 +160,83 @@ public class MainActivity extends CameraActivity {
                         // camera calibration using the petri dish's size
                         // we get the bounding rectangle to calculate the width of the dish in pixels
                         Rect dishBoundingRect = Imgproc.boundingRect(petriDishContour);
-                        Imgproc.rectangle(inputFrameRGB, dishBoundingRect.tl(), dishBoundingRect.br(), new Scalar(0, 0, 255), 3);
+                        Imgproc.rectangle(inputFrameRGB, dishBoundingRect.tl(),
+                                dishBoundingRect.br(), new Scalar(0, 0, 255), 3);
                         double petriDishDiameterMm = 90.0; // 9cm petri dish
-                        double petriDishDiameterPx = (dishBoundingRect.width + dishBoundingRect.height) / 2.0;
+                        double petriDishDiameterPx =
+                                (dishBoundingRect.width + dishBoundingRect.height) / 2.0;
                         double pointOfInterestShiftMm = 37;
                         double pixelsPerMm = petriDishDiameterPx / petriDishDiameterMm;
-                        int pointOfInterestShiftPx = (int) Math.round(pointOfInterestShiftMm * pixelsPerMm);
+                        int pointOfInterestShiftPx = (int)
+                                Math.round(pointOfInterestShiftMm * pixelsPerMm);
 
                         // centre of dish contour
-                        Imgproc.circle(inputFrameRGB, new Point(centroidX, centroidY), 30, new Scalar(255, 0, 0), 5);
+                        Imgproc.circle(inputFrameRGB, new Point(centroidX, centroidY), 30,
+                                new Scalar(255, 0, 0), 5);
                         // drawing largest contour
-                        Imgproc.drawContours(inputFrameRGB, List.of(petriDishContour), 0, new Scalar(0, 255, 0), 2);
+                        Imgproc.drawContours(inputFrameRGB, List.of(petriDishContour), 0,
+                                new Scalar(0, 255, 0), 2);
 
                         // drawing detection squares
                         int halfSize = 20;
                         Scalar color = new Scalar(255, 125, 0);
                         int thickness = 2;
-                        Imgproc.rectangle(inputFrameRGB,
-                                new Point(centroidX - halfSize, centroidY + pointOfInterestShiftPx - halfSize),
-                                new Point(centroidX + halfSize, centroidY + pointOfInterestShiftPx + halfSize),
-                                color, thickness);
-
-                        Imgproc.rectangle(inputFrameRGB,
+                        Rect southRect = new Rect(
+                                new Point(centroidX - halfSize,
+                                        centroidY + pointOfInterestShiftPx - halfSize),
+                                new Point(centroidX + halfSize,
+                                        centroidY + pointOfInterestShiftPx + halfSize)
+                        );
+                        Rect southEastRect = new Rect(
                                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) - halfSize,
                                         centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) - halfSize),
                                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) + halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) + halfSize),
-                                color, thickness);
-
-                        Imgproc.rectangle(inputFrameRGB,
-                                new Point(centroidX - halfSize, centroidY - pointOfInterestShiftPx - halfSize),
-                                new Point(centroidX + halfSize, centroidY - pointOfInterestShiftPx + halfSize),
-                                color, thickness);
-
-                        Imgproc.rectangle(inputFrameRGB,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) + halfSize)
+                        );
+                        Rect northRect = new Rect(
+                                new Point(centroidX - halfSize,
+                                        centroidY - pointOfInterestShiftPx - halfSize),
+                                new Point(centroidX + halfSize,
+                                        centroidY - pointOfInterestShiftPx + halfSize)
+                        );
+                        Rect northEastRect = new Rect(
                                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) - halfSize,
                                         centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) - halfSize),
                                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) + halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) + halfSize),
-                                color, thickness);
-
-                        Imgproc.rectangle(inputFrameRGB,
-                                new Point(centroidX + pointOfInterestShiftPx - halfSize, centroidY - halfSize),
-                                new Point(centroidX + pointOfInterestShiftPx + halfSize, centroidY + halfSize),
-                                color, thickness);
-
-                        Imgproc.rectangle(inputFrameRGB,
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) - halfSize,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) + halfSize)
+                        );
+                        Rect eastRect = new Rect(
+                                new Point(centroidX + pointOfInterestShiftPx - halfSize,
+                                centroidY - halfSize),
+                                new Point(centroidX + pointOfInterestShiftPx + halfSize,
+                                        centroidY + halfSize)
+                        );
+                        Rect northWestRect = new Rect(new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) - halfSize,
                                         centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) - halfSize),
                                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) + halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) + halfSize),
-                                color, thickness);
-
-                        Imgproc.rectangle(inputFrameRGB,
-                                new Point(centroidX - pointOfInterestShiftPx - halfSize, centroidY - halfSize),
-                                new Point(centroidX - pointOfInterestShiftPx + halfSize, centroidY + halfSize),
-                                color, thickness);
-
-                        Imgproc.rectangle(inputFrameRGB,
+                                        centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) + halfSize)
+                        );
+                        Rect westRect = new Rect(
+                                new Point(centroidX - pointOfInterestShiftPx - halfSize,
+                                centroidY - halfSize),
+                                new Point(centroidX - pointOfInterestShiftPx + halfSize,
+                                        centroidY + halfSize)
+                        );
+                        Rect southWestRect = new Rect(
                                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) - halfSize,
                                         centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) - halfSize),
                                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) + halfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) + halfSize),
-                                color, thickness);
+                                        centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) + halfSize)
+                        );
+
+
+                        List<Rect> allRects = Arrays.asList(
+                                southRect, southEastRect, northRect, northEastRect,
+                                eastRect, northWestRect, westRect, southWestRect);
+
+                        for (Rect rect : allRects) {
+                            Imgproc.rectangle(inputFrameRGB, rect.tl(), rect.br(), color, thickness);
+                        }
 
                     }
 
