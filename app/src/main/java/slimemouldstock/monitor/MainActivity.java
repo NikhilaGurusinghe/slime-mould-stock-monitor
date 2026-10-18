@@ -261,7 +261,7 @@ public class MainActivity extends CameraActivity {
                                     rect.tl(), Imgproc.FONT_HERSHEY_SIMPLEX, 1,
                                     new Scalar(255, 255, 255), 2);
 
-                            // make a decision here and send API request, depending on if decision
+                            // TODO make a decision here and send API request, depending on if decision
                             // was succesful
                         }
                     }
