@@ -124,15 +124,15 @@ public class MainActivity extends CameraActivity {
                 //      assumes that the camera does not move
                 List<MatOfPoint> contours = new ArrayList<>();
                 Imgproc.findContours(edgeDetectionThresholdMask, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-                // get largest contour (by area)
+                // get largest contour (by area) -> assume petri dish is the largest thing in frame
                 // https://stackoverflow.com/questions/40669684/opencv-sorting-contours-by-area-in-java
-//                Optional<MatOfPoint> largest = contours.stream().max(new Comparator<MatOfPoint>() {
-//                    public int compare(MatOfPoint c1, MatOfPoint c2) {
-//
-//                        return (int) (Imgproc.contourArea(c1)- Imgproc.contourArea(c2));
-//                    }
-//                });
-                MatOfPoint petriDishContour = (!contours.isEmpty()) ? contours.get(0) : null;
+                Optional<MatOfPoint> largest = contours.stream().max(new Comparator<MatOfPoint>() {
+                    public int compare(MatOfPoint c1, MatOfPoint c2) {
+
+                        return (int) (Imgproc.contourArea(c1)- Imgproc.contourArea(c2));
+                    }
+                });
+                MatOfPoint petriDishContour = largest.orElse(null);
 
                 // ranges in HSV
                 Core.inRange(inputFrameHSV, inRangeLowerBoundHSV, inRangeUpperBoundHSV, inRangeThresholdMask);
@@ -153,7 +153,7 @@ public class MainActivity extends CameraActivity {
                         Log.d("DEBUGDEBUG", "#contours: " + contours.size() + ", centroidX: " + centroidX + ", " + " centroidY: " + centroidY);
 
                         Imgproc.circle(maskedRGB, new Point(centroidX, centroidY), 30, new Scalar(255, 0, 0));
-
+                        Imgproc.drawContours(maskedRGB, List.of(petriDishContour), 0, new Scalar(0, 255, 0), 2);
 
                     }
 
