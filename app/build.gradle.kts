@@ -43,5 +43,5 @@ dependencies {
 
 
     // Source: https://mvnrepository.com/artifact/org.opencv/opencv
-    implementation("org.opencv:opencv:5.0.0")
+    implementation("org.opencv:opencv:4.14.0")
 }

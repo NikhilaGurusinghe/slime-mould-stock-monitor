@@ -25,9 +25,9 @@ import org.opencv.imgproc.Moments;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-
-import slimemouldstock.monitor.utils.AccessibleMoments;
+import java.util.Optional;
 
 // code credits ->
 // setup
@@ -124,6 +124,14 @@ public class MainActivity extends CameraActivity {
                 //      assumes that the camera does not move
                 List<MatOfPoint> contours = new ArrayList<>();
                 Imgproc.findContours(edgeDetectionThresholdMask, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+                // get largest contour (by area)
+                // https://stackoverflow.com/questions/40669684/opencv-sorting-contours-by-area-in-java
+//                Optional<MatOfPoint> largest = contours.stream().max(new Comparator<MatOfPoint>() {
+//                    public int compare(MatOfPoint c1, MatOfPoint c2) {
+//
+//                        return (int) (Imgproc.contourArea(c1)- Imgproc.contourArea(c2));
+//                    }
+//                });
                 MatOfPoint petriDishContour = (!contours.isEmpty()) ? contours.get(0) : null;
 
                 // ranges in HSV
@@ -136,13 +144,13 @@ public class MainActivity extends CameraActivity {
 
                 // draw centroid of petri dish
                 if (petriDishContour != null) {
-                    Moments petriDishMoment = AccessibleMoments.contourMoments(petriDishContour);
+                    Moments petriDishMoment = Imgproc.moments(petriDishContour);
 
                     if (petriDishMoment.m00 != 0) {
                         int centroidX = (int) (petriDishMoment.m10 / petriDishMoment.m00);
                         int centroidY = (int) (petriDishMoment.m01 / petriDishMoment.m00);
 
-                        Log.d("DEBUGDEBUG", "centroidX: " + centroidX + ", " + " centroidY: " + centroidY);
+                        Log.d("DEBUGDEBUG", "#contours: " + contours.size() + ", centroidX: " + centroidX + ", " + " centroidY: " + centroidY);
 
                         Imgproc.circle(maskedRGB, new Point(centroidX, centroidY), 30, new Scalar(255, 0, 0));
 
