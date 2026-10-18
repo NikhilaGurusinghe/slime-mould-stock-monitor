@@ -28,6 +28,7 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -92,7 +93,7 @@ public class MainActivity extends CameraActivity {
     };
 
     // State stuff
-    StateManager stateManager = new StateManager();
+    StateManager stateManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,8 +204,13 @@ public class MainActivity extends CameraActivity {
             return;
         }
 
-
-
+        try {
+            stateManager = new StateManager(null);
+        } catch (MalformedURLException e) {
+            Log.e("SlimeMouldStockMonitor/StateManager",
+                    "Failed to initialize state management");
+            return;
+        }
     }
 
     private void getCameraPermission() {
