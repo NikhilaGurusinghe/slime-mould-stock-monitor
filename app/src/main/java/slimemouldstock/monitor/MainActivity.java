@@ -228,13 +228,31 @@ public class MainActivity extends CameraActivity {
                                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) + halfSize,
                                         centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) + halfSize)
                         );
+                        Rect thresholdRect = new Rect(0, 0,
+                                inRangeThresholdMask.cols(), inRangeThresholdMask.rows());
 
 
                         List<Rect> allRects = Arrays.asList(
                                 southRect, southEastRect, northRect, northEastRect,
                                 eastRect, northWestRect, westRect, southWestRect);
+                        List<String> allRectsLabels = Arrays.asList("southRect", "southEastRect", "northRect", "northEastRect",
+                                "eastRect", "northWestRect", "westRect", "southWestRect");
 
-                        for (Rect rect : allRects) {
+                        for (int i = 0; i < allRects.size(); i++) {
+                            Rect rect = allRects.get(i);
+                            // clip rectangles into our threshold mask
+                            Rect clippedRect = intersectRect(rect, thresholdRect);
+
+                            if (clippedRect.width <= 0 || clippedRect.height <= 0) {
+                                continue;
+                            }
+
+                            Mat rectMask = inRangeThresholdMask.submat(clippedRect);
+                            int numberSlimeMouldPixels = Core.countNonZero(rectMask);
+                            double percentageSlimeMouldPixels =
+                                    (double) numberSlimeMouldPixels / clippedRect.area();
+                            Log.d(allRectsLabels.get(i), allRectsLabels.get(i) + ": " + percentageSlimeMouldPixels * 100 + "%");
+
                             Imgproc.rectangle(inputFrameRGB, rect.tl(), rect.br(), color, thickness);
                         }
 
@@ -270,6 +288,15 @@ public class MainActivity extends CameraActivity {
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{ Manifest.permission.CAMERA }, 101);
         }
+    }
+
+    private Rect intersectRect(Rect a, Rect b) {
+        int left = Math.max(a.x, b.x);
+        int top = Math.max(a.y, b.y);
+        int right = Math.min(a.x + a.width, b.x + b.width);
+        int bottom = Math.min(a.y + a.height, b.y + b.height);
+
+        return new Rect(left, top, Math.max(0, right - left), Math.max(0, bottom - top));
     }
 
     @Override
