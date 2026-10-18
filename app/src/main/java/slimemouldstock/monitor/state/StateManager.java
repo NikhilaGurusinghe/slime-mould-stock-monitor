@@ -5,8 +5,7 @@ public class StateManager {
     private final State DEFAULT_STATE = new GrowthState(this);
     private State state;
 
-
-    public void State() {
+    public StateManager() {
         this.state = DEFAULT_STATE;
         DEFAULT_STATE.onEnterState();
     }
