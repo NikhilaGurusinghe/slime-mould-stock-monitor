@@ -1,5 +1,7 @@
 package slimemouldstock.monitor;
 
+import static slimemouldstock.monitor.utils.OpenCVUtils.intersectRect;
+
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -33,6 +35,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import slimemouldstock.monitor.state.StateManager;
+
 // code credits ->
 // setup
 // https://www.youtube.com/watch?v=6Nl3JYpEgeI&list=PLTuKYqpidPXZjtOEjOgeKxNAe4NzSgsg8&index=3
@@ -49,6 +53,7 @@ import java.util.Optional;
 // https://stackoverflow.com/questions/6242268/repeat-a-task-with-a-time-delay
 public class MainActivity extends CameraActivity {
 
+    // TODO a lot of this CV stuff can just be packed into an object
     // cv2 camera stuff
     private CameraBridgeViewBase cameraBridgeViewBase;
 
@@ -85,6 +90,9 @@ public class MainActivity extends CameraActivity {
             taskHandler.postDelayed(this, ANALYZE_FRAME_DELAY_MS);
         }
     };
+
+    // State stuff
+    StateManager stateManager = new StateManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,7 +141,7 @@ public class MainActivity extends CameraActivity {
 
                 // RGBA -> RGB
                 Imgproc.cvtColor(inputFrameRGBA, inputFrameRGB, Imgproc.COLOR_RGBA2RGB);
-                // RGB -> RGB + guassian blur
+                // RGB -> RGB + Gaussian blur
                 // guassian blur on main RGB, if we want more blur use a 5x5 kernel
                 Imgproc.GaussianBlur(inputFrameRGB, inputFrameRGBBlurred,
                         new Size(3, 3), 0, 0);
@@ -172,126 +180,13 @@ public class MainActivity extends CameraActivity {
                 // apply threshold mask to original RGB
                 Core.bitwise_and(inputFrameRGB, inputFrameRGB, maskedRGB, inRangeThresholdMask);
 
-                // draw centroid of petri dish
-                if (petriDishContour != null) {
-                    Moments petriDishMoment = Imgproc.moments(petriDishContour);
-
-                    if (petriDishMoment.m00 != 0) {
-                        int centroidX = (int) (petriDishMoment.m10 / petriDishMoment.m00);
-                        int centroidY = (int) (petriDishMoment.m01 / petriDishMoment.m00);
-
-                        // camera calibration using the petri dish's size
-                        // we get the bounding rectangle to calculate the width of the dish in pixels
-                        Rect dishBoundingRect = Imgproc.boundingRect(petriDishContour);
-                        Imgproc.rectangle(inputFrameRGB, dishBoundingRect.tl(),
-                                dishBoundingRect.br(), new Scalar(0, 0, 255), 3);
-                        double petriDishDiameterMm = 90.0; // 9cm petri dish
-                        double petriDishDiameterPx =
-                                (dishBoundingRect.width + dishBoundingRect.height) / 2.0;
-                        double pointOfInterestShiftMm = 35;
-                        double pixelsPerMm = petriDishDiameterPx / petriDishDiameterMm;
-                        int pointOfInterestShiftPx = (int)
-                                Math.round(pointOfInterestShiftMm * pixelsPerMm);
-
-                        // centre of dish contour
-                        Imgproc.circle(inputFrameRGB, new Point(centroidX, centroidY), 30,
-                                new Scalar(255, 0, 0), 5);
-                        // drawing largest contour
-                        Imgproc.drawContours(inputFrameRGB, List.of(petriDishContour), 0,
-                                new Scalar(0, 255, 0), 2);
-
-                        // drawing detection squares
-                        int regionHalfSize = 20;
-                        Scalar color = new Scalar(255, 125, 0);
-                        int thickness = 2;
-                        Rect southRect = new Rect(
-                                new Point(centroidX - regionHalfSize,
-                                        centroidY + pointOfInterestShiftPx - regionHalfSize),
-                                new Point(centroidX + regionHalfSize,
-                                        centroidY + pointOfInterestShiftPx + regionHalfSize)
-                        );
-                        Rect southEastRect = new Rect(
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) - regionHalfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) - regionHalfSize),
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) + regionHalfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) + regionHalfSize)
-                        );
-                        Rect northRect = new Rect(
-                                new Point(centroidX - regionHalfSize,
-                                        centroidY - pointOfInterestShiftPx - regionHalfSize),
-                                new Point(centroidX + regionHalfSize,
-                                        centroidY - pointOfInterestShiftPx + regionHalfSize)
-                        );
-                        Rect northEastRect = new Rect(
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) - regionHalfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) - regionHalfSize),
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) + regionHalfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) + regionHalfSize)
-                        );
-                        Rect eastRect = new Rect(
-                                new Point(centroidX + pointOfInterestShiftPx - regionHalfSize,
-                                centroidY - regionHalfSize),
-                                new Point(centroidX + pointOfInterestShiftPx + regionHalfSize,
-                                        centroidY + regionHalfSize)
-                        );
-                        Rect northWestRect = new Rect(new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) - regionHalfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) - regionHalfSize),
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) + regionHalfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) + regionHalfSize)
-                        );
-                        Rect westRect = new Rect(
-                                new Point(centroidX - pointOfInterestShiftPx - regionHalfSize,
-                                centroidY - regionHalfSize),
-                                new Point(centroidX - pointOfInterestShiftPx + regionHalfSize,
-                                        centroidY + regionHalfSize)
-                        );
-                        Rect southWestRect = new Rect(
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) - regionHalfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) - regionHalfSize),
-                                new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) + regionHalfSize,
-                                        centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) + regionHalfSize)
-                        );
-                        Rect thresholdRect = new Rect(0, 0,
-                                inRangeThresholdMask.cols(), inRangeThresholdMask.rows());
-
-
-                        List<Rect> allRects = Arrays.asList(
-                                southRect, southEastRect, northRect, northEastRect,
-                                eastRect, northWestRect, westRect, southWestRect);
-                        List<String> allRectsLabels = Arrays.asList("southRect", "southEastRect", "northRect", "northEastRect",
-                                "eastRect", "northWestRect", "westRect", "southWestRect");
-
-                        for (int i = 0; i < allRects.size(); i++) {
-                            Rect rect = allRects.get(i);
-
-                            // clip rectangles into our threshold mask
-                            Rect clippedRect = intersectRect(rect, thresholdRect);
-
-                            if (clippedRect.width <= 0 || clippedRect.height <= 0) {
-                                continue;
-                            }
-
-                            Mat rectMask = inRangeThresholdMask.submat(clippedRect);
-                            int numberSlimeMouldPixels = Core.countNonZero(rectMask);
-                            double percentageSlimeMouldPixels =
-                                    (double) numberSlimeMouldPixels / clippedRect.area();
-
-                            Imgproc.rectangle(inputFrameRGB, rect.tl(), rect.br(), color, thickness);
-                            Imgproc.putText(inputFrameRGB,
-                                    Math.round(percentageSlimeMouldPixels * 100) + "%",
-                                    rect.tl(), Imgproc.FONT_HERSHEY_SIMPLEX, 1,
-                                    new Scalar(255, 255, 255), 2);
-
-                            // TODO make a decision here and send API request, depending on if decision
-                            // was successful
-                        }
-                    }
-                }
-
+                Mat outputFrame = stateManager.getState().onCameraFrame(inputFrameRGBA, inputFrameRGB, inputFrameHSV,
+                        inputFrameGRAY, maskedRGB,
+                        edgeDetectionThresholdMask, inRangeThresholdMask, petriDishContour);
 
                 // reset analyze this frame flag
                 analyzeThisFrame = false;
-                return inputFrameRGB;
+                return outputFrame;
             }
         });
 
@@ -316,15 +211,6 @@ public class MainActivity extends CameraActivity {
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{ Manifest.permission.CAMERA }, 101);
         }
-    }
-
-    private Rect intersectRect(Rect a, Rect b) {
-        int left = Math.max(a.x, b.x);
-        int top = Math.max(a.y, b.y);
-        int right = Math.min(a.x + a.width, b.x + b.width);
-        int bottom = Math.min(a.y + a.height, b.y + b.height);
-
-        return new Rect(left, top, Math.max(0, right - left), Math.max(0, bottom - top));
     }
 
     @Override

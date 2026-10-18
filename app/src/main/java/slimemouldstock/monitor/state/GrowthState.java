@@ -143,6 +143,7 @@ public class GrowthState extends State {
 
             // TODO make a decision here and send API request, depending on if decision
             // was successful
+            // this.stateManager.setState(new State(this.stateManager));
         }
 
         return frameRGB;

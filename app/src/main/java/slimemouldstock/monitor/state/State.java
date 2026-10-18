@@ -9,7 +9,7 @@ import org.opencv.core.MatOfPoint;
 // plan state diagram!!
 public abstract class State {
 
-    private final StateManager stateManager;
+    protected final StateManager stateManager;
 
     public State(StateManager stateManager) {
         this.stateManager = stateManager;
