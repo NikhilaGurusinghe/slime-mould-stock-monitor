@@ -18,6 +18,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -150,11 +151,25 @@ public class MainActivity extends CameraActivity {
                         int centroidX = (int) (petriDishMoment.m10 / petriDishMoment.m00);
                         int centroidY = (int) (petriDishMoment.m01 / petriDishMoment.m00);
 
-                        Log.d("DEBUGDEBUG", "#contours: " + contours.size() + ", centroidX: " + centroidX + ", " + " centroidY: " + centroidY);
+                        // we get the bounding rectangle to calculate the width of the dish in pixels
+                        Rect dishBoundingRect = Imgproc.boundingRect(petriDishContour);
+                        Imgproc.rectangle(inputFrameRGB, dishBoundingRect.tl(), dishBoundingRect.br(), new Scalar(0, 0, 255), 3);
+                        double petriDishDiameterMm = 90.0; // 9cm petri dish
+                        double petriDishDiameterPx = (dishBoundingRect.width + dishBoundingRect.height) / 2.0;
+                        double pointOfInterestShiftMm = 30;
+                        double pixelsPerMm = petriDishDiameterPx / petriDishDiameterMm;
+                        int pointOfInterestShiftPx = (int) Math.round(pointOfInterestShiftMm * pixelsPerMm);
 
-                        Imgproc.circle(maskedRGB, new Point(centroidX, centroidY), 30, new Scalar(255, 0, 0));
-                        Imgproc.drawContours(maskedRGB, List.of(petriDishContour), 0, new Scalar(0, 255, 0), 2);
+                        // centre of dish contour
+                        Imgproc.circle(inputFrameRGB, new Point(centroidX, centroidY), 30, new Scalar(255, 0, 0), 5);
+                        // drawing largest contour
+                        Imgproc.drawContours(inputFrameRGB, List.of(petriDishContour), 0, new Scalar(0, 255, 0), 2);
 
+
+                        Imgproc.circle(inputFrameRGB, new Point(centroidX, centroidY + pointOfInterestShiftPx), 20,  new Scalar(255, 125, 0), 2);
+                        Imgproc.circle(inputFrameRGB, new Point(centroidX, centroidY - pointOfInterestShiftPx), 20,  new Scalar(255, 125, 0), 2);
+                        Imgproc.circle(inputFrameRGB, new Point(centroidX + pointOfInterestShiftPx, centroidY), 20,  new Scalar(255, 125, 0), 2);
+                        Imgproc.circle(inputFrameRGB, new Point(centroidX - pointOfInterestShiftPx, centroidY), 20,  new Scalar(255, 125, 0), 2);
                     }
 
                 }
@@ -162,7 +177,7 @@ public class MainActivity extends CameraActivity {
 
 
 
-                return maskedRGB;
+                return inputFrameRGB;
             }
         });
 
