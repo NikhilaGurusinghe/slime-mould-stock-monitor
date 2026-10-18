@@ -5,10 +5,11 @@ import org.opencv.core.MatOfPoint;
 
 public class TrayOutState extends State {
     @Override
-    public void onCameraFrame(Mat frameRGBA, Mat frameRGB, Mat frameHSV, Mat frameGRAY,
-                              Mat edgeDetectionMask, Mat slimeMouldDetectionMask,
-                              MatOfPoint petriDishContour) {
+    public Mat onCameraFrame(Mat frameRGBA, Mat frameRGB, Mat frameHSV, Mat frameGRAY,
+                             Mat edgeDetectionMask, Mat slimeMouldDetectionMask,
+                             MatOfPoint petriDishContour) {
 
+        return new Mat();
     }
 
     @Override

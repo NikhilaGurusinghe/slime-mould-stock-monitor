@@ -3,6 +3,8 @@ package slimemouldstock.monitor;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -66,8 +68,23 @@ public class MainActivity extends CameraActivity {
     // S value is more to do with getting rid of white light - good for getting rid of shadows
     //      reflections/hue leakage of yellow, but less colour info
     // V doesn't seem to do a whole lot
-    Scalar inRangeLowerBoundHSV = new Scalar(20, 175, 0);
-    Scalar inRangeUpperBoundHSV = new Scalar(80, 255, 255);
+    private final Scalar inRangeLowerBoundHSV = new Scalar(20, 175, 0);
+    private final Scalar inRangeUpperBoundHSV = new Scalar(80, 255, 255);
+
+    // this is used to dictate if a new frame should be analyzed from the camera
+    private volatile boolean analyzeThisFrame = false;
+    // how often to analyze frame (in millseconds)
+    private final long ANALYZE_FRAME_DELAY_MS = 1_000;
+
+    // this is to do with analyzing the frame every X ms
+    private final Handler taskHandler = new android.os.Handler(Looper.getMainLooper());
+    private final Runnable updateAnalyzeThisFrameRunnable = new Runnable() {
+        @Override
+        public void run() {
+            analyzeThisFrame = true;
+            taskHandler.postDelayed(this, ANALYZE_FRAME_DELAY_MS);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +125,10 @@ public class MainActivity extends CameraActivity {
 
             @Override
             public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+                if (!analyzeThisFrame) {
+                    return inputFrameRGB.empty() ? inputFrame.rgba() : inputFrameRGB;
+                }
+
                 Mat inputFrameRGBA = inputFrame.rgba();
 
                 // RGBA -> RGB
@@ -152,7 +173,6 @@ public class MainActivity extends CameraActivity {
                 Core.bitwise_and(inputFrameRGB, inputFrameRGB, maskedRGB, inRangeThresholdMask);
 
                 // draw centroid of petri dish
-                // TODO have this work on a timer
                 if (petriDishContour != null) {
                     Moments petriDishMoment = Imgproc.moments(petriDishContour);
 
@@ -255,7 +275,6 @@ public class MainActivity extends CameraActivity {
                             int numberSlimeMouldPixels = Core.countNonZero(rectMask);
                             double percentageSlimeMouldPixels =
                                     (double) numberSlimeMouldPixels / clippedRect.area();
-                            Log.d(allRectsLabels.get(i), allRectsLabels.get(i) + ": " + percentageSlimeMouldPixels * 100 + "%");
 
                             Imgproc.rectangle(inputFrameRGB, rect.tl(), rect.br(), color, thickness);
                             Imgproc.putText(inputFrameRGB,
@@ -264,14 +283,14 @@ public class MainActivity extends CameraActivity {
                                     new Scalar(255, 255, 255), 2);
 
                             // TODO make a decision here and send API request, depending on if decision
-                            // was succesful
+                            // was successful
                         }
                     }
                 }
 
 
-
-
+                // reset analyze this frame flag
+                analyzeThisFrame = false;
                 return inputFrameRGB;
             }
         });
@@ -320,5 +339,20 @@ public class MainActivity extends CameraActivity {
     @Override
     protected List<? extends CameraBridgeViewBase> getCameraViewList() {
         return Collections.singletonList(cameraBridgeViewBase);
+    }
+
+    @Override
+    protected void onStop() {
+        // handler stuff
+        taskHandler.removeCallbacks(updateAnalyzeThisFrameRunnable);
+        super.onStop();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // handler stuff
+        taskHandler.removeCallbacks(updateAnalyzeThisFrameRunnable);
+        taskHandler.postDelayed(updateAnalyzeThisFrameRunnable, ANALYZE_FRAME_DELAY_MS);
     }
 }
