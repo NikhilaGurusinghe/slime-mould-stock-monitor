@@ -3,8 +3,6 @@ package slimemouldstock.monitor.state;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 
-import java.net.MalformedURLException;
-
 // TODO
 // handle a tick counter for when to take a photo -> deciding state
 // handle states such as when the dish is not available/slime mould is deciding
@@ -19,9 +17,11 @@ public abstract class State {
     }
 
     public abstract Mat onCameraFrame(Mat frameRGBA, Mat frameRGB, Mat frameHSV, Mat frameGRAY,
-                                       Mat slimeMouldRGB,
-                                       Mat edgeDetectionMask, Mat slimeMouldDetectionMask,
-                                       MatOfPoint petriDishContour);
+                                      Mat slimeMouldRGB,
+                                      Mat edgeDetectionMask, Mat slimeMouldDetectionMask,
+                                      MatOfPoint petriDishContour);
+
     public abstract void onEnterState();
+
     public abstract void onExitState();
 }

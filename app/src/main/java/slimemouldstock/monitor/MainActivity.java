@@ -1,7 +1,5 @@
 package slimemouldstock.monitor;
 
-import static slimemouldstock.monitor.utils.OpenCVUtils.intersectRect;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -21,16 +19,12 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.imgproc.Moments;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -167,7 +161,7 @@ public class MainActivity extends CameraActivity {
                 Optional<MatOfPoint> largest = contours.stream().max(new Comparator<MatOfPoint>() {
                     public int compare(MatOfPoint c1, MatOfPoint c2) {
 
-                        return (int) (Imgproc.contourArea(c1)- Imgproc.contourArea(c2));
+                        return (int) (Imgproc.contourArea(c1) - Imgproc.contourArea(c2));
                     }
                 });
                 MatOfPoint petriDishContour = largest.orElse(null);
@@ -215,7 +209,7 @@ public class MainActivity extends CameraActivity {
 
     private void getCameraPermission() {
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{ Manifest.permission.CAMERA }, 101);
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, 101);
         }
     }
 

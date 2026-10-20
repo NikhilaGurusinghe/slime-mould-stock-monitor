@@ -33,7 +33,7 @@ public class HttpClient {
     }
 
     public boolean sendHttpRequest(HttpRequestMethods requestMethod,
-                               HashMap<String, String> requestHeaders) {
+                                   HashMap<String, String> requestHeaders) {
         try {
             this.connection.setRequestMethod(requestMethod.name());
         } catch (ProtocolException e) {
@@ -42,14 +42,13 @@ public class HttpClient {
 
         // set request headers
         if (requestHeaders != null && !requestHeaders.isEmpty()) {
-           requestHeaders.forEach((headerProperty, headerValue) -> {
-               if (headerProperty != null && !headerProperty.isBlank() &&
-                       headerValue != null && !headerValue.isBlank()) {
-                   connection.setRequestProperty(headerProperty, headerValue);
-               }
-           });
+            requestHeaders.forEach((headerProperty, headerValue) -> {
+                if (headerProperty != null && !headerProperty.isBlank() &&
+                        headerValue != null && !headerValue.isBlank()) {
+                    connection.setRequestProperty(headerProperty, headerValue);
+                }
+            });
         }
-
 
 
         return true;
