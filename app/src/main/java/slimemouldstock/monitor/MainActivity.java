@@ -217,7 +217,7 @@ public class MainActivity extends CameraActivity {
         try {
             mqttClient = new MqttClient(getApplicationContext(), "tcp://broker.emqx.io:1883");
 
-            mqttClient.publishToTopic("slime-mould-stock-monitor/led", 2, true, "1");
+            //mqttClient.publishToTopic("slime-mould-stock-monitor/led", 2, true, "1");
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }
