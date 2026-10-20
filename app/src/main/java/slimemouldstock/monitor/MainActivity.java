@@ -13,6 +13,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.opencv.android.CameraActivity;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
@@ -30,6 +31,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import slimemouldstock.monitor.mqtt.MqttClient;
 import slimemouldstock.monitor.state.StateManager;
 
 // code credits ->
@@ -128,6 +130,10 @@ public class MainActivity extends CameraActivity {
 
             @Override
             public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+                if (stateManager == null) {
+                    return inputFrame.rgba();
+                }
+
                 if (!analyzeThisFrame) {
                     return inputFrameRGB.empty() ? inputFrame.rgba() : inputFrameRGB;
                 }
@@ -185,26 +191,38 @@ public class MainActivity extends CameraActivity {
             }
         });
 
+        try {
+            stateManager = new StateManager(null);
+        } catch (MalformedURLException e) {
+            Log.e("slimemouldstock.monitor/StateManager",
+                    "Failed to initialize state management");
+            return;
+        }
+
         // init OpenCV
         if (OpenCVLoader.initLocal()) {
-            Log.d("SlimeMouldStockMonitor/OpenCV", "OpenCV loaded successfully");
+            Log.d("slimemouldstock.monitor/OpenCV", "OpenCV loaded successfully");
 
             // init -> on success code
             cameraBridgeViewBase.enableView();
 
         } else {
-            Log.e("SlimeMouldStockMonitor/OpenCV", "OpenCV initialization failed!");
+            Log.e("slimemouldstock.monitor/OpenCV", "OpenCV initialization failed!");
             (Toast.makeText(this, "OpenCV initialization failed!", Toast.LENGTH_LONG)).show();
             return;
         }
 
+        // test
+        MqttClient mqttClient;
         try {
-            stateManager = new StateManager(null);
-        } catch (MalformedURLException e) {
-            Log.e("SlimeMouldStockMonitor/StateManager",
-                    "Failed to initialize state management");
-            return;
+            mqttClient = new MqttClient(getApplicationContext(), "tcp://broker.emqx.io:1883");
+
+            mqttClient.publishToTopic("slime-mould-stock-monitor/led", 2, true, "1");
+        } catch (MqttException e) {
+            throw new RuntimeException(e);
         }
+
+
     }
 
     private void getCameraPermission() {

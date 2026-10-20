@@ -3,7 +3,6 @@ package slimemouldstock.monitor.mqtt;
 import android.content.Context;
 import android.util.Log;
 
-import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -15,12 +14,14 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.nio.charset.StandardCharsets;
 
+import info.mqtt.android.service.MqttAndroidClient;
+
 // https://wildanmsyah.wordpress.com/2017/05/11/mqtt-android-client-tutorial/#dependencies
 // TODO clean up logging
 public class MqttClient {
     private MqttAndroidClient client;
-    private final String clientID = "43464f4b-e823-4ae4-8e17-fe0b1dde0153" +
-            "-slime-mould-stock-monitor";
+    private final String clientID = "43464f4b-e823-4ae4-8e17-fe0b1dde0153-slime-mould-stock-monitor";
+    // something like "tcp://broker.emqx.io:1883"
     private final String brokerURL;
 
     public MqttClient(Context context, String brokerURL) throws MqttException {
@@ -29,14 +30,14 @@ public class MqttClient {
         client.setCallback(new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
-                Log.d("SlimeMouldStockMonitor/MqttClient",
+                Log.d("slimemouldstock.monitor/MqttClient",
                         "MQTT client " + (reconnect ? "reconnected" : "connected") +
                                 " successfully to " + serverURI);
             }
 
             @Override
             public void connectionLost(Throwable cause) {
-                Log.d("SlimeMouldStockMonitor/MqttClient",
+                Log.d("slimemouldstock.monitor/MqttClient",
                         "MQTT client disconnected: " + cause.getMessage());
             }
 
@@ -46,7 +47,8 @@ public class MqttClient {
 
             @Override
             public void deliveryComplete(IMqttDeliveryToken token) {
-
+                Log.d("slimemouldstock.monitor/MqttClient",
+                        "MQTT client completed delivery");
             }
         });
 
@@ -71,7 +73,7 @@ public class MqttClient {
 
             @Override
             public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                Log.d("SlimeMouldStockMonitor/MqttClient",
+                Log.d("slimemouldstock.monitor/MqttClient",
                         "MQTT client failed to connect to " + brokerURL + ": " +
                                 exception.getMessage());
             }
@@ -79,12 +81,24 @@ public class MqttClient {
 
     }
 
-    public void publishToTopic(String topic, int qos, Boolean retained, String message) throws MqttException {
+    public void publishToTopic(String topic,
+                               int qos,
+                               Boolean retained,
+                               String message) throws MqttException {
+        if (!client.isConnected()) {
+            // add to queue
+        }
+
+        // otherwise we can publish immediately
         MqttMessage publishMe = new MqttMessage(message.getBytes(StandardCharsets.UTF_8));
         publishMe.setQos(qos);
         if (retained != null) {
             publishMe.setRetained(retained);
         }
         client.publish(topic, publishMe);
+    }
+
+    public boolean isClientConnected() {
+        return client.isConnected();
     }
 }
