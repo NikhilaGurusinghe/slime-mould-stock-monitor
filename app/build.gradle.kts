@@ -44,4 +44,7 @@ dependencies {
 
     // Source: https://mvnrepository.com/artifact/org.opencv/opencv
     implementation("org.opencv:opencv:4.14.0")
+    // Source: https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.client.mqttv3
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+    implementation("org.eclipse.paho:org.eclipse.paho.android.service:1.1.1")
 }
