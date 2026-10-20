@@ -44,4 +44,6 @@ dependencies {
 
     // Source: https://mvnrepository.com/artifact/org.opencv/opencv
     implementation("org.opencv:opencv:4.14.0")
+    // https://github.com/moquette-io/moquette
+    implementation("com.github.moquette-io.moquette:distribution:v0.18.0")
 }

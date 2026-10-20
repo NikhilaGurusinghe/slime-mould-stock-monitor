@@ -19,6 +19,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            // required for https://github.com/moquette-io/moquette
+            url = uri("https://jitpack.io")
+        }
     }
 }
 
