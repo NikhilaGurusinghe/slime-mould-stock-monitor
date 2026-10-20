@@ -12,16 +12,15 @@ import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
 
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 // https://wildanmsyah.wordpress.com/2017/05/11/mqtt-android-client-tutorial/#dependencies
 // TODO clean up logging
 public class MqttClient {
     private MqttAndroidClient client;
-    private final String clientID = UUID.randomUUID().toString() + "-slime-mould-stock-monitor";
+    private final String clientID = "43464f4b-e823-4ae4-8e17-fe0b1dde0153" +
+            "-slime-mould-stock-monitor";
     private final String brokerURL;
 
     public MqttClient(Context context, String brokerURL) throws MqttException {
