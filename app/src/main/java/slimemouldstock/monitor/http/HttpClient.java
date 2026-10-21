@@ -9,6 +9,11 @@ import java.util.HashMap;
 
 // https://oxylabs.io/blog/java-http-request
 // https://www.baeldung.com/java-http-request
+// retrofit for android
+// https://nayosx.blogspot.com/2021/08/how-to-upload-file-from-form-data-post.html
+// https://www.geeksforgeeks.org/android/how-to-post-data-to-api-using-retrofit-in-android/
+// https://medium.com/@myofficework000/uploading-files-with-multipart-form-data-in-retrofit-android-f9a4fecba360
+// https://medium.com/@mahbooberezaee68/upload-audio-file-with-post-multipart-form-data-using-retrofit-2-0-in-kotlin-6d050e293ac5
 public class HttpClient {
     private final int CONNECT_TIMEOUT_MS = 5_000;
     private final int READ_TIMEOUT_MS = 5_000;

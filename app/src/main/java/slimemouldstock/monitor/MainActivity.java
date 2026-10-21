@@ -13,7 +13,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.opencv.android.CameraActivity;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.OpenCVLoader;
@@ -31,7 +30,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import slimemouldstock.monitor.mqtt.MqttClient;
 import slimemouldstock.monitor.state.StateManager;
 
 // code credits ->
@@ -212,15 +210,15 @@ public class MainActivity extends CameraActivity {
             return;
         }
 
-        // test
-        MqttClient mqttClient;
-        try {
-            mqttClient = new MqttClient(getApplicationContext(), "tcp://broker.emqx.io:1883");
-
-            //mqttClient.publishToTopic("slime-mould-stock-monitor/led", 2, true, "1");
-        } catch (MqttException e) {
-            throw new RuntimeException(e);
-        }
+        // TODO fix Mqtt client to work more async'ly
+//        MqttClient mqttClient;
+//        try {
+////            mqttClient = new MqttClient(getApplicationContext(), "tcp://broker.emqx.io:1883");
+//
+//            //mqttClient.publishToTopic("slime-mould-stock-monitor/led", 2, true, "1");
+//        } catch (MqttException e) {
+//            throw new RuntimeException(e);
+//        }
 
 
     }
