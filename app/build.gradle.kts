@@ -49,4 +49,6 @@ dependencies {
     implementation("com.github.hannesa2:paho.mqtt.android:4.5.1")
     // Source: https://mvnrepository.com/artifact/com.squareup.retrofit2/retrofit
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    // Source: https://mvnrepository.com/artifact/com.squareup.retrofit2/converter-gson
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
 }

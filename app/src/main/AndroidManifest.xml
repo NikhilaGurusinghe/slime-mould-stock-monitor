@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- for OpenCV -->
     <uses-permission android:name="android.permission.CAMERA"/>
@@ -14,6 +13,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Http Client permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- For HTTP Client permissions (android:usesCleartextTraffic="true") -->
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -33,8 +36,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- Eclipse Paho MQTT Client -->
-        <service android:name="org.eclipse.paho.android.service.MqttService" />
     </application>
 
 </manifest>
