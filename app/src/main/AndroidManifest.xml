@@ -16,8 +16,10 @@
     <!-- Http Client permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- For HTTP Client permissions (android:usesCleartextTraffic="true") -->
+    <!-- So we can contact HTTP addresses (android:usesCleartextTraffic="true") -->
+    <!-- TODO this should only be for testing -->
     <application
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
