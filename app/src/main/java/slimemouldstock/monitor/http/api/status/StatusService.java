@@ -10,15 +10,15 @@ import retrofit2.http.Part;
 
 public interface StatusService {
     // does not need prepended slash
-    String API_ENDPOINT = "v1/status";
+    String API_ENDPOINT = "api/v1/status";
 
     @Multipart
     @POST(API_ENDPOINT)
-    Call<ResponseBody> POSTDefault(@Part("status") RequestBody status);
+    Call<ResponseBody> POSTDefault(@Part("state") RequestBody state);
 
     @Multipart
     @POST(API_ENDPOINT)
-    Call<ResponseBody> POSTDecision(@Part("status") RequestBody status,
+    Call<ResponseBody> POSTDecision(@Part("state") RequestBody state,
                                     @Part("decision") RequestBody decision,
                                     @Part MultipartBody.Part image);
 }

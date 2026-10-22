@@ -23,7 +23,7 @@ public class RetrofitClient {
     // requires a trailing slash
     // if using http
     // ensure that android:usesCleartextTraffic="true" is added in the manifest's application
-    private static final String DEFAULT_CONNECTION_URL = "http://localhost:3000/";
+    private static final String DEFAULT_CONNECTION_URL = "http://192.168.0.119:3000/";
     private static volatile Retrofit instance;
 
     private RetrofitClient() {}

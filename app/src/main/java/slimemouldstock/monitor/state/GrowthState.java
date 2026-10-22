@@ -13,6 +13,12 @@ import org.opencv.imgproc.Moments;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+
+import slimemouldstock.monitor.http.api.APIUtils;
+import slimemouldstock.monitor.http.api.status.SlimeMouldDecision;
+import slimemouldstock.monitor.http.api.status.SlimeMouldState;
+import slimemouldstock.monitor.utils.OpenCVUtils;
 
 public class GrowthState extends State {
     public GrowthState(StateManager stateManager) {
@@ -140,10 +146,19 @@ public class GrowthState extends State {
                     Math.round(percentageSlimeMouldPixels * 100) + "%",
                     rect.tl(), Imgproc.FONT_HERSHEY_SIMPLEX, 1,
                     new Scalar(255, 255, 255), 2);
+        }
 
-            // TODO make a decision here and send API request, depending on if decision
-            // was successful
-            // this.stateManager.setState(new State(this.stateManager));
+        // TODO make a decision here and send API request, depending on if decision
+        // was successful
+        // this.stateManager.setState(new State(this.stateManager));
+        // TODO decision here is for testing only and is hardcoded
+        byte[] jpegImage = OpenCVUtils.convertMatToJPEGBytes(frameRGB);
+
+        if (jpegImage.length > 0) {
+            APIUtils.sendStatusUpdate(SlimeMouldState.SLIME_MOULD_DECISION,
+                    SlimeMouldDecision.A,
+                    jpegImage,
+                    System.currentTimeMillis() + "_" + UUID.randomUUID() + ".jpg");
         }
 
         return frameRGB;

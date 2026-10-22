@@ -136,6 +136,9 @@ public class MainActivity extends CameraActivity {
                     return inputFrameRGB.empty() ? inputFrame.rgba() : inputFrameRGB;
                 }
 
+                Log.e("slimemouldstock.monitor/StateManager",
+                        String.valueOf(System.currentTimeMillis()));
+
                 Mat inputFrameRGBA = inputFrame.rgba();
 
                 // RGBA -> RGB
@@ -179,7 +182,8 @@ public class MainActivity extends CameraActivity {
                 // apply threshold mask to original RGB
                 Core.bitwise_and(inputFrameRGB, inputFrameRGB, maskedRGB, inRangeThresholdMask);
 
-                Mat outputFrame = stateManager.getState().onCameraFrame(inputFrameRGBA, inputFrameRGB, inputFrameHSV,
+                Mat outputFrame = stateManager.getState().onCameraFrame(
+                        inputFrameRGBA, inputFrameRGB, inputFrameHSV,
                         inputFrameGRAY, maskedRGB,
                         edgeDetectionThresholdMask, inRangeThresholdMask, petriDishContour);
 

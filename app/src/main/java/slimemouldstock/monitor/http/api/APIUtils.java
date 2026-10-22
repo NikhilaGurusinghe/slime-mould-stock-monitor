@@ -1,5 +1,7 @@
 package slimemouldstock.monitor.http.api;
 
+import android.util.Log;
+
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -69,11 +71,12 @@ public class APIUtils {
         postRequest.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-
+                Log.d("slimemouldstock.monitor/DEBUG", "got response! " + response.message());
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("slimemouldstock.monitor/DEBUG", "failed " + t.getMessage());
 
             }
         });
