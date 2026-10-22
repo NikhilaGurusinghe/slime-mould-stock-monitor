@@ -152,7 +152,8 @@ public class GrowthState extends State {
         // was successful
         // this.stateManager.setState(new State(this.stateManager));
         // TODO decision here is for testing only and is hardcoded
-        byte[] jpegImage = OpenCVUtils.convertMatToJPEGBytes(frameRGB);
+        // this returns the unedited frame (frameRGBA)
+        byte[] jpegImage = OpenCVUtils.convertMatToJPEGBytes(frameRGBA);
 
         if (jpegImage.length > 0) {
             APIUtils.sendStatusUpdate(SlimeMouldState.SLIME_MOULD_DECISION,
