@@ -9,7 +9,8 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 
 public interface StatusService {
-    String API_ENDPOINT = "/v1/status";
+    // does not need prepended slash
+    String API_ENDPOINT = "v1/status";
 
     @Multipart
     @POST(API_ENDPOINT)

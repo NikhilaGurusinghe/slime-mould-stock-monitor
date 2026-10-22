@@ -4,7 +4,6 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 // Singleton class
 // https://oxylabs.io/blog/java-http-request
@@ -21,7 +20,10 @@ public class RetrofitClient {
     private static final int WRITE_TIMEOUT_MS = 5_000;
     // TODO currently this is hardcoded in, but need a better API to specify this
     //  on init of singleton class, difficult to do cause this is a singleton
-    private static final String DEFAULT_CONNECTION_URL = "http://localhost:3000";
+    // requires a trailing slash
+    // if using http
+    // ensure that android:usesCleartextTraffic="true" is added in the manifest's application
+    private static final String DEFAULT_CONNECTION_URL = "http://localhost:3000/";
     private static volatile Retrofit instance;
 
     private RetrofitClient() {}
@@ -39,7 +41,6 @@ public class RetrofitClient {
                     instance = new Retrofit.Builder()
                             .client(httpClient)
                             .baseUrl(DEFAULT_CONNECTION_URL)
-                            .addConverterFactory(GsonConverterFactory.create())
                             .build();
                 }
             }
