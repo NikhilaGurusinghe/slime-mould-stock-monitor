@@ -96,11 +96,11 @@ public class MqttClient {
     public void publishToTopic(String topic,
                                int qos,
                                Boolean retained,
-                               String message) throws MqttException {
+                               String message) {
         pendingMessages.add(new PendingMessage(topic, qos, retained, message));
 
         // TODO might have to replace this with volatile boolean if .isConnected is not thread safe
-        if (!client.isConnected()) {
+        if (client.isConnected()) {
             emptyPendingMessages();
         }
     }
@@ -111,7 +111,7 @@ public class MqttClient {
             return;
         }
 
-        if (isEmptyingPendingMessages.compareAndSet(false, true)) {
+        if (!isEmptyingPendingMessages.compareAndSet(false, true)) {
             return;
         }
 
@@ -151,7 +151,7 @@ public class MqttClient {
                             Log.e(logCatTag, "Message delivery failed; requeued", exception);
                         }
                     });
-                } catch (MqttException | RuntimeException exception) {
+                } catch (Exception exception) {
                     // requeue failed message for redelivery
                     // TODO this does not guarantee ordering, so this could have unintended
                     pendingMessages.offer(pendingMessage);
