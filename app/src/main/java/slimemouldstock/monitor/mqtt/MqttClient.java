@@ -111,6 +111,7 @@ public class MqttClient {
             return;
         }
 
+        // stops race by only letting one call through
         if (!isEmptyingPendingMessages.compareAndSet(false, true)) {
             return;
         }

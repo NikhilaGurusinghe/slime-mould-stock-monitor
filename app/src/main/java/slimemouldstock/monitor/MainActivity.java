@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 import slimemouldstock.monitor.mqtt.MqttClient;
+import slimemouldstock.monitor.mqtt.MqttUtils;
 import slimemouldstock.monitor.state.StateManager;
 
 // code credits ->
@@ -77,19 +78,28 @@ public class MainActivity extends CameraActivity {
     private volatile boolean analyzeThisFrame = false;
     // how often to analyze frame (in millseconds)
     private final long ANALYZE_FRAME_DELAY_MS = 5_000;
+    private final long LED_ON_TO_ANALYZABLE_FRAME_DELAY_MS = 1_000;
 
     // this is to do with analyzing the frame every X ms
     private final Handler taskHandler = new android.os.Handler(Looper.getMainLooper());
-    private final Runnable updateAnalyzeThisFrameRunnable = new Runnable() {
+    private final Runnable updateAnalyzeThisFrameRunnable = () -> analyzeThisFrame = true;
+    private final Runnable frameAnalysisCycleRunnable = new Runnable() {
         @Override
         public void run() {
-            analyzeThisFrame = true;
-            taskHandler.postDelayed(this, ANALYZE_FRAME_DELAY_MS);
+            MqttUtils.sendTurnLedOn(mqttClient);
+
+            // wait 1 second after led turn on
+            taskHandler.postDelayed(updateAnalyzeThisFrameRunnable,
+                    LED_ON_TO_ANALYZABLE_FRAME_DELAY_MS);
+            taskHandler.postDelayed(frameAnalysisCycleRunnable, ANALYZE_FRAME_DELAY_MS);
         }
     };
 
     // State stuff
     StateManager stateManager;
+
+    // MQTT Stuff, this should probably be a singleton
+    MqttClient mqttClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,10 +194,16 @@ public class MainActivity extends CameraActivity {
                 // apply threshold mask to original RGB
                 Core.bitwise_and(inputFrameRGB, inputFrameRGB, maskedRGB, inRangeThresholdMask);
 
+                // LED will be activated a second before this frame via a runnable
+
                 Mat outputFrame = stateManager.getState().onCameraFrame(
                         inputFrameRGBA, inputFrameRGB, inputFrameHSV,
                         inputFrameGRAY, maskedRGB,
-                        edgeDetectionThresholdMask, inRangeThresholdMask, petriDishContour);
+                        edgeDetectionThresholdMask, inRangeThresholdMask, petriDishContour
+                );
+
+                // deactivate led - we have to do this here
+                MqttUtils.sendTurnLedOff(mqttClient);
 
                 // reset analyze this frame flag
                 analyzeThisFrame = false;
@@ -216,16 +232,17 @@ public class MainActivity extends CameraActivity {
             return;
         }
 
-        // TODO fix Mqtt client to work more async'ly
-        MqttClient mqttClient;
+        // init mqtt client
         try {
-            mqttClient = new MqttClient(getApplicationContext(), "tcp://broker.emqx.io:1883");
+            mqttClient = new MqttClient(getApplicationContext(),
+                    "tcp://broker.emqx.io:1883");
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }
 
-        mqttClient.publishToTopic("slime-mould-stock-monitor/led", 2, true, "hello, world!");
-
+        // testing connection
+        mqttClient.publishToTopic("slime-mould-stock-monitor/led", 2,
+                true, "start");
     }
 
     private void getCameraPermission() {
@@ -252,6 +269,7 @@ public class MainActivity extends CameraActivity {
     protected void onStop() {
         // handler stuff
         taskHandler.removeCallbacks(updateAnalyzeThisFrameRunnable);
+        taskHandler.removeCallbacks(frameAnalysisCycleRunnable);
         super.onStop();
     }
 
@@ -260,6 +278,9 @@ public class MainActivity extends CameraActivity {
         super.onStart();
         // handler stuff
         taskHandler.removeCallbacks(updateAnalyzeThisFrameRunnable);
-        taskHandler.postDelayed(updateAnalyzeThisFrameRunnable, ANALYZE_FRAME_DELAY_MS);
+        taskHandler.removeCallbacks(frameAnalysisCycleRunnable);
+        taskHandler.postDelayed(frameAnalysisCycleRunnable,
+                ANALYZE_FRAME_DELAY_MS - LED_ON_TO_ANALYZABLE_FRAME_DELAY_MS);
+
     }
 }
