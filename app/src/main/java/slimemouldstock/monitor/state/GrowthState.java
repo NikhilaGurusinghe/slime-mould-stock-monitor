@@ -72,47 +72,27 @@ public class GrowthState extends State {
         int regionHalfSize = 40;
         Scalar color = new Scalar(255, 125, 0);
         int thickness = 2;
-//        Rect southRect = new Rect(
-//                new Point(centroidX - regionHalfSize,
-//                        centroidY + pointOfInterestShiftPx - regionHalfSize),
-//                new Point(centroidX + regionHalfSize,
-//                        centroidY + pointOfInterestShiftPx + regionHalfSize)
-//        );
+
         Rect southEastRect = new Rect(
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) - regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) - regionHalfSize),
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) + regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) + regionHalfSize)
         );
-//        Rect northRect = new Rect(
-//                new Point(centroidX - regionHalfSize,
-//                        centroidY - pointOfInterestShiftPx - regionHalfSize),
-//                new Point(centroidX + regionHalfSize,
-//                        centroidY - pointOfInterestShiftPx + regionHalfSize)
-//        );
+
         Rect northEastRect = new Rect(
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) - regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) - regionHalfSize),
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) + regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) + regionHalfSize)
         );
-//        Rect eastRect = new Rect(
-//                new Point(centroidX + pointOfInterestShiftPx - regionHalfSize,
-//                        centroidY - regionHalfSize),
-//                new Point(centroidX + pointOfInterestShiftPx + regionHalfSize,
-//                        centroidY + regionHalfSize)
-//        );
+
         Rect northWestRect = new Rect(new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) - regionHalfSize,
                 centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) - regionHalfSize),
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) + regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) + regionHalfSize)
         );
-//        Rect westRect = new Rect(
-//                new Point(centroidX - pointOfInterestShiftPx - regionHalfSize,
-//                        centroidY - regionHalfSize),
-//                new Point(centroidX - pointOfInterestShiftPx + regionHalfSize,
-//                        centroidY + regionHalfSize)
-//        );
+
         Rect southWestRect = new Rect(
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) - regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) - regionHalfSize),
