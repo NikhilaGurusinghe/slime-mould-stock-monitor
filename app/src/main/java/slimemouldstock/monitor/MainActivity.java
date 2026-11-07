@@ -77,8 +77,8 @@ public class MainActivity extends CameraActivity {
     // this is used to dictate if a new frame should be analyzed from the camera
     private volatile boolean analyzeThisFrame = false;
     // how often to analyze frame (in millseconds)
-    private final long ANALYZE_FRAME_DELAY_MS = 5_000;
-    private final long LED_ON_TO_ANALYZABLE_FRAME_DELAY_MS = 1_000;
+    private final long ANALYZE_FRAME_DELAY_MS = 1_000;
+    private final long LED_ON_TO_ANALYZABLE_FRAME_DELAY_MS = 500;
 
     // this is to do with analyzing the frame every X ms
     private final Handler taskHandler = new android.os.Handler(Looper.getMainLooper());
@@ -241,7 +241,7 @@ public class MainActivity extends CameraActivity {
         }
 
         // testing connection
-        mqttClient.publishToTopic("slime-mould-stock-monitor/led", 2,
+        mqttClient.publishToTopic("slime-mould-stock-monitor/led_relay/command", 2,
                 true, "start");
     }
 

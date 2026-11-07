@@ -21,6 +21,10 @@ import slimemouldstock.monitor.http.api.status.SlimeMouldState;
 import slimemouldstock.monitor.utils.OpenCVUtils;
 
 public class GrowthState extends State {
+
+    private int cycleNumber = 0;
+    private final int NUMBER_OF_CYCLES = 2;
+
     public GrowthState(StateManager stateManager) {
         super(stateManager);
     }
@@ -52,7 +56,7 @@ public class GrowthState extends State {
         double petriDishDiameterMm = 90.0; // 9cm petri dish
         double petriDishDiameterPx =
                 (dishBoundingRect.width + dishBoundingRect.height) / 2.0;
-        double pointOfInterestShiftMm = 35;
+        double pointOfInterestShiftMm = 25;
         double pixelsPerMm = petriDishDiameterPx / petriDishDiameterMm;
         int pointOfInterestShiftPx = (int)
                 Math.round(pointOfInterestShiftMm * pixelsPerMm);
@@ -65,50 +69,50 @@ public class GrowthState extends State {
                 new Scalar(0, 255, 0), 2);
 
         // drawing detection squares
-        int regionHalfSize = 20;
+        int regionHalfSize = 40;
         Scalar color = new Scalar(255, 125, 0);
         int thickness = 2;
-        Rect southRect = new Rect(
-                new Point(centroidX - regionHalfSize,
-                        centroidY + pointOfInterestShiftPx - regionHalfSize),
-                new Point(centroidX + regionHalfSize,
-                        centroidY + pointOfInterestShiftPx + regionHalfSize)
-        );
+//        Rect southRect = new Rect(
+//                new Point(centroidX - regionHalfSize,
+//                        centroidY + pointOfInterestShiftPx - regionHalfSize),
+//                new Point(centroidX + regionHalfSize,
+//                        centroidY + pointOfInterestShiftPx + regionHalfSize)
+//        );
         Rect southEastRect = new Rect(
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) - regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) - regionHalfSize),
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(Math.PI / 4) + regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(Math.PI / 4) + regionHalfSize)
         );
-        Rect northRect = new Rect(
-                new Point(centroidX - regionHalfSize,
-                        centroidY - pointOfInterestShiftPx - regionHalfSize),
-                new Point(centroidX + regionHalfSize,
-                        centroidY - pointOfInterestShiftPx + regionHalfSize)
-        );
+//        Rect northRect = new Rect(
+//                new Point(centroidX - regionHalfSize,
+//                        centroidY - pointOfInterestShiftPx - regionHalfSize),
+//                new Point(centroidX + regionHalfSize,
+//                        centroidY - pointOfInterestShiftPx + regionHalfSize)
+//        );
         Rect northEastRect = new Rect(
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) - regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) - regionHalfSize),
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(7 * Math.PI / 4) + regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(7 * Math.PI / 4) + regionHalfSize)
         );
-        Rect eastRect = new Rect(
-                new Point(centroidX + pointOfInterestShiftPx - regionHalfSize,
-                        centroidY - regionHalfSize),
-                new Point(centroidX + pointOfInterestShiftPx + regionHalfSize,
-                        centroidY + regionHalfSize)
-        );
+//        Rect eastRect = new Rect(
+//                new Point(centroidX + pointOfInterestShiftPx - regionHalfSize,
+//                        centroidY - regionHalfSize),
+//                new Point(centroidX + pointOfInterestShiftPx + regionHalfSize,
+//                        centroidY + regionHalfSize)
+//        );
         Rect northWestRect = new Rect(new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) - regionHalfSize,
                 centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) - regionHalfSize),
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(5 * Math.PI / 4) + regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(5 * Math.PI / 4) + regionHalfSize)
         );
-        Rect westRect = new Rect(
-                new Point(centroidX - pointOfInterestShiftPx - regionHalfSize,
-                        centroidY - regionHalfSize),
-                new Point(centroidX - pointOfInterestShiftPx + regionHalfSize,
-                        centroidY + regionHalfSize)
-        );
+//        Rect westRect = new Rect(
+//                new Point(centroidX - pointOfInterestShiftPx - regionHalfSize,
+//                        centroidY - regionHalfSize),
+//                new Point(centroidX - pointOfInterestShiftPx + regionHalfSize,
+//                        centroidY + regionHalfSize)
+//        );
         Rect southWestRect = new Rect(
                 new Point(centroidX + pointOfInterestShiftPx * Math.cos(3 * Math.PI / 4) - regionHalfSize,
                         centroidY + pointOfInterestShiftPx * Math.sin(3 * Math.PI / 4) - regionHalfSize),
@@ -120,11 +124,14 @@ public class GrowthState extends State {
 
 
         List<Rect> allRects = Arrays.asList(
-                southRect, southEastRect, northRect, northEastRect,
-                eastRect, northWestRect, westRect, southWestRect);
-        List<String> allRectsLabels = Arrays.asList("southRect", "southEastRect", "northRect",
+//                southRect, northRect, eastRect, westRect,
+                southEastRect,  northEastRect,
+                northWestRect, southWestRect);
+        List<String> allRectsLabels = Arrays.asList(
+//                "southRect", "northRect", "eastRect", "westRect",
+                "southEastRect",
                 "northEastRect",
-                "eastRect", "northWestRect", "westRect", "southWestRect");
+                "northWestRect","southWestRect");
 
         for (int i = 0; i < allRects.size(); i++) {
             Rect rect = allRects.get(i);
