@@ -153,6 +153,8 @@ public class GrowthState extends State {
                     Math.round(percentageSlimeMouldPixels * 100) + "%",
                     rect.tl(), Imgproc.FONT_HERSHEY_SIMPLEX, 1,
                     new Scalar(255, 255, 255), 2);
+
+            rectMask.release();
         }
 
         // TODO make a decision here and send API request, depending on if decision

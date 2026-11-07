@@ -4,7 +4,7 @@ import java.net.MalformedURLException;
 
 public class StateManager {
     // TODO update this default state
-    private final State DEFAULT_STATE = new GrowthState(this);
+    private final State DEFAULT_STATE = new TrayOutState(this); //new GrowthState(this);
     private State state;
 
 

@@ -64,6 +64,7 @@ public class MainActivity extends CameraActivity {
     private Mat inputFrameGRAY;
     private Mat inputFrameGRAYBlurred;
     private Mat maskedRGB;
+    private Mat lastFrameRGB;
 
     // Looking to recognise slime mould coloured pixels (in our ideal lighting)
     // in HSV
@@ -123,6 +124,7 @@ public class MainActivity extends CameraActivity {
             @Override
             public void onCameraViewStarted(int width, int height) {
                 // init these here after OpenCV has initialized
+                lastFrameRGB = new Mat();
                 inputFrameRGB = new Mat();
                 inputFrameRGBBlurred = new Mat();
                 inputFrameHSV = new Mat();
@@ -145,7 +147,7 @@ public class MainActivity extends CameraActivity {
                 }
 
                 if (!analyzeThisFrame) {
-                    return inputFrameRGB.empty() ? inputFrame.rgba() : inputFrameRGB;
+                    return lastFrameRGB.empty() ? inputFrame.rgba() : lastFrameRGB;
                 }
 
                 Log.e("slimemouldstock.monitor/StateManager",
@@ -204,6 +206,13 @@ public class MainActivity extends CameraActivity {
 
                 // deactivate led - we have to do this here
                 MqttUtils.sendTurnLedOff(mqttClient);
+
+                // last frame is expecting RGB and our onCameraFrame might output anything
+                if (outputFrame.channels() == 4) {
+                    Imgproc.cvtColor(outputFrame, lastFrameRGB, Imgproc.COLOR_RGBA2RGB);
+                } else {
+                    outputFrame.copyTo(lastFrameRGB);
+                }
 
                 // reset analyze this frame flag
                 analyzeThisFrame = false;
