@@ -1,5 +1,7 @@
 package slimemouldstock.monitor.state;
 
+import android.os.SystemClock;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -12,6 +14,10 @@ import java.util.List;
 
 public class TrayOutState extends State {
 
+    // one hour delay
+    private final long FIRST_ANALYZE_DELAY_MS = 3600_000;
+    private long initialTimeMS;
+
     public TrayOutState(StateManager stateManager) {
         super(stateManager);
     }
@@ -20,6 +26,16 @@ public class TrayOutState extends State {
     public Mat onCameraFrame(Mat frameRGBA, Mat frameRGB, Mat frameHSV, Mat frameGRAY,
                              Mat slimeMouldRGB, Mat edgeDetectionMask, Mat slimeMouldDetectionMask,
                              MatOfPoint petriDishContour) {
+        // TODO HACK we should really listen from something from the dashboard that bypasses this
+        //  block, rather then just having it on a timer
+        // wait until DELAY_TO_FIRST_ANALYZE elapses before we start analyzing
+        // from the tray out state to potentially other states
+        long currentTimeMS = SystemClock.elapsedRealtime();
+        if (currentTimeMS - initialTimeMS < FIRST_ANALYZE_DELAY_MS) {
+            return frameRGB;
+        }
+
+
         int TRAY_IN_SLIME_MOULD_PERCENTAGE = 2;
 
         if (petriDishContour == null || petriDishContour.empty()) {
@@ -65,7 +81,7 @@ public class TrayOutState extends State {
 
     @Override
     public void onEnterState() {
-
+        initialTimeMS = SystemClock.elapsedRealtime();
     }
 
     @Override

@@ -7,6 +7,8 @@ public class StateManager {
     private final State DEFAULT_STATE = new TrayOutState(this); //new GrowthState(this);
     private State state;
 
+    // TODO this should be elsewhere
+    protected int growthCycleNumber = 0;
 
     public StateManager(String connectionURL) throws MalformedURLException {
         this.state = DEFAULT_STATE;
